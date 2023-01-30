@@ -6,7 +6,7 @@ Time-frequency analysis
 
 Peak detection
 
-![peaks](https://user-images.githubusercontent.com/65451658/211141596-f3ff2c59-7d4c-4c3d-ab4c-19267d3b37b9.png)
+![peaks](https://user-images.githubusercontent.com/65451658/215457247-340aa50a-c233-42dd-81b5-1faefa25b731.png)
 
 2d plot for Times series
 
