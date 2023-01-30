@@ -41,85 +41,46 @@ def separatingCows(dfFarm, colname4grouping='cow'):
     csvList = [filename for filename in csvList if filename.endswith("csv")]
     return csvList
 
+def get_prominences(df, col_index):
+    array=df.iloc[:, col_index]
+    
+    peaks_h = signal.find_peaks(array)[0]
+    prominences_h = signal.peak_prominences(array, peaks_h)[0]
+    
+    return peaks_h, prominences_h
 
-def get_prominences(df, col_index, prominences, peaks_low, peaks,
-                    prominences_low, prominences_high):
-    prominences = prominences
-    peaks = peaks
-    prominences_high = prominences_high
-    prominences_low = prominences_low
-
-    inversed_col = [-x for x in df.iloc[:, col_index]]
-    peaks_l = signal.find_peaks(inversed_col)[0]
-    prominences_l = signal.peak_prominences(inversed_col, peaks_l)[0]
-    prominences_l = [-x for x in prominences_l]
-    prominences.append(prominences_l)
-
-    col2analyse = df.iloc[:, col_index]
-    peaks_h = signal.find_peaks(col2analyse)[0]
-    prominences_h = signal.peak_prominences(col2analyse, peaks_h)[0]
-    prominences.append(list(prominences_h))
-
-    # merge prominence values and append found peaks
-    peaks_low.append(peaks_l)
-    peaks.append(peaks_h)
-    prominences_low.append(prominences_l)
-    prominences_high.append(prominences_h)
-    return prominences, peaks_low, peaks, prominences_low, prominences_high
-
-
-def normal_fitting2(df, oriDF, col_index, distance=1, CIlim=0.95):
-    """checks whether df is a tuple - from split df due to NAs. If yes, find peaks in boths, then fit
-    normal distri to merged prominence values then plot it on common graph
-    HAVE TO SAVE DF AS TUPLE EVEN IF ONLY ONE"""
-
-    prominences = []
-    peaks_low = []
-    peaks = []
-    prominences_low = []
-    prominences_high = []
-    oriDF = oriDF.resample(str(distance) + "h").mean()
-    dfLIST = [df[i].resample(str(distance) + "h").mean() for i in range(len(df))]
-    df = tuple(dfLIST)
-
-    # if type(df) is tuple:                    #if tuple, merge prom values from all sections
-    for i in range(len(df)):
-        prominences, peaks_low, peaks, prominences_low, prominences_high = get_prominences(df=df[i],
-                                                                                           col_index=col_index,
-                                                                                           prominences=prominences,
-                                                                                           peaks_low=peaks_low,
-                                                                                           peaks=peaks,
-                                                                                           prominences_low=prominences_low,
-                                                                                           prominences_high=prominences_high)
-    prominences = np.concatenate(prominences)
-
-    # fitting gamma to prominences
-    m, sd = stats.norm.fit(prominences)  # beta=scale
-    xhist = plt.hist(prominences, density=True,
-                     color="grey", alpha=0.5)
-    quantile = np.linspace(stats.norm.ppf(0.001, loc=m, scale=sd),
-                           stats.norm.ppf(0.999, loc=m, scale=sd), 1000)
-    CI = stats.norm.interval(CIlim, loc=m, scale=sd)
-    print(CI)
-    R = stats.norm.pdf(quantile, loc=m, scale=sd)
-    plt.vlines(x=[CI[1], CI[0]], ymin=min(R), ymax=max(R), color=["red", "green"], linestyle="dashed")
-    plt.plot(quantile, R, color="darkblue")
+def gamma_fitting(df, col_index, distance=1, CIlim=0.95):
+    """
+    
+    """
+    array=df.iloc[:, col_index]
+    peaks, prominences = get_prominences(df = df, col_index = col_index)
+    
+    #gammafit
+    alpha,loc,beta=stats.gamma.fit(prominences) #beta=scale
+    #quantile=np.arange(0,1400,10)
+    #PDF gamma
+    xhist=plt.hist(prominences,density=True,
+                   color="violet",alpha=0.5)
+    quantile=np.arange(0,round(max(xhist[1])),10)
+    R=stats.gamma.pdf(quantile,alpha,loc=loc,scale=beta)
+    #IC
+    IC=stats.gamma.interval(CIlim,a=alpha,loc=loc,scale=beta)
+    plt.vlines(IC[1],ymin=min(R),ymax=max(R),color="red", label="CI = {}".format(CIlim))
+    plt.plot(quantile,R,color="darkblue")
+    plt.title("Fitting gamma distribution to signal peaks")
+    plt.legend()
     plt.show()
-
-    plt.figure(figsize=(16, 5))
-    plt.plot(oriDF.index, oriDF.iloc[:, col_index], 'pink', label='data', alpha=0.3)
-    # plt.plot(testSlice1.index, testSlice1.iloc[:,1], 'violet', label='data',alpha=0.7)
-    # plt.plot(testSlice2.index, testSlice2.iloc[:,1], 'violet', label='data',alpha=0.7)
-    for i in range(len(peaks)):
-        peaksGammaHigh = peaks[i][prominences_high[i] > CI[1]]
-        peaksGammaLow = peaks_low[i][prominences_low[i] < CI[0]]
-        plt.scatter(df[i].index[peaksGammaHigh], df[i].iloc[:, col_index][peaksGammaHigh], color="red")
-        plt.scatter(df[i].index[peaksGammaLow], df[i].iloc[:, col_index][peaksGammaLow], color="green")
-        # plt.plot(col2analyse.index, col2analyse, 'pink', label='data',alpha=0.5)
-        plt.plot(df[i].index, df[i].iloc[:, col_index], 'violet', label='data', alpha=0.5)
-        # plt.plot(df.index, inversed_col, 'darkblue', label='data',alpha=0.5)
+    
+    
+    #plot peaks that are > ICmax
+    peaksGamma=peaks[prominences>IC[1]]
+    plt.figure(figsize=(16,5))
+    plt.plot(df.index, array, 'lightpink', label='data',alpha=0.5)
+    plt.scatter(df.index[peaksGamma],array[peaksGamma], edgecolors="darkblue",label='monthly increase in activity', alpha = 0.9)
+    plt.legend()
+    plt.title("Daily activity")
     plt.show()
-
 
 def cuttingOutNas(csvList, distance):
     for i in range(len(csvList)):
