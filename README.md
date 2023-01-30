@@ -14,7 +14,7 @@ Peak detection
 
 Circular statistics for Time series
 
-![circstat](https://user-images.githubusercontent.com/65451658/211141920-13bf0ae9-a725-441c-899b-a563f4b16d0e.png)
+![circstat](https://user-images.githubusercontent.com/65451658/215444879-6815e250-86d4-4b81-90c6-84828b23db0e.png)
 
 
 
