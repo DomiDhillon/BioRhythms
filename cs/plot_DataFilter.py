@@ -25,7 +25,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=2):
 
 
 def plot_DataFilter(df, col_index, order=3, fs=24, cutoff=5 / 14,
-                    get_filtered=False):
+                    get_filtered=False, title =""):
     """Filter requirements.
     fs= n samples per 1 time unit
     cutoff= how many times per n*unit"""
@@ -57,7 +57,8 @@ def plot_DataFilter(df, col_index, order=3, fs=24, cutoff=5 / 14,
     plt.ylim(data_range)
     plt.grid()
     plt.legend()
-
-    title = df.columns[col_index]
+    
+    if not title:
+        title = df.columns[col_index]
     plt.title(title)
     plt.show()

@@ -50,7 +50,7 @@ def surrogate(df, col_index, sampling_freq, scale_max, n_surrogate=10):
 
 def plot_spect(df, col_index, title="", sampling_freq=24,
                sampling_unit="hours", sampling_period='days',
-               scale_max=130, n_surrogate=10):
+               scale_max=130, n_surrogate=10, plot_surrogate = False):
     """plot spectrogram (yaxis in log2 scale) & periodogram"""
     if not title:
         title = df.columns[col_index]
@@ -132,8 +132,10 @@ def plot_spect(df, col_index, title="", sampling_freq=24,
     figtitle = fig.suptitle(title, y=0.98)
     figtitle.set_fontsize(15)
     plt.show()
-    shuffled = np.mean(shuffled, axis=0)
-    shuffled = pd.DataFrame(shuffled, index=df.index)
-
+    
     #can return processed shuffled dataset for further plotting
-    #return shuffled
+    # shuffled = np.mean(shuffled, axis=0)
+    # shuffled = pd.DataFrame(shuffled, index=df.index)
+
+    
+   
