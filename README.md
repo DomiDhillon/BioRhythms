@@ -2,7 +2,7 @@
 
 Time-frequency analysis
 
-![rat10_spectro](https://user-images.githubusercontent.com/65451658/163572668-cb953cb0-ca7a-4d57-a77e-d70bdc15572e.jpg)
+![rat10_spectro](https://user-images.githubusercontent.com/65451658/217695932-1e95818b-6381-4712-ab7a-3bc63492ffcb.png)
 
 Peak detection
 
